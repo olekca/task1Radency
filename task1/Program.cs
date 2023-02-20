@@ -18,13 +18,17 @@ namespace task1
         {
             Console.WriteLine("Press s to start");
             while (Console.Read() != 's') ;
+            if (! System.IO.File.Exists(System.Reflection.Assembly.GetEntryAssembly().Location + ".config")){
+                return;
+            }
+
             
             LogTimer l = new LogTimer();
             l.Init();
             TxtFileWatcher txtWatcher = new TxtFileWatcher();
             CsvFileWatcher csvWatcher = new CsvFileWatcher();
             Console.WriteLine("Process started");
-            Console.WriteLine("Press q to quit.\n Press r to restart");
+            Console.WriteLine("Press q to quit.\nPress r to restart");
             int input=Console.Read();
             while (true)
             {

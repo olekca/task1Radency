@@ -12,9 +12,9 @@ namespace task1
     class LogTimer
     {
         static Timer timer;
-        long interval = 30000; //30 секунд
+        long interval = 30000; //1000 = 1 second
         int Hour = 21;
-        int Minute = 35;
+        int Minute = 43;
         static object synclock = new object();
         static bool isLogged = false;
 

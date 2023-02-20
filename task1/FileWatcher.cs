@@ -37,10 +37,7 @@ namespace task1
             ++Program.ParsedFiles;
             var models = lines.Select(p => Input.ParseInput(p, filePath)).ToList().Where(m => m != null);
             var city = models.GroupBy(m => m.city);
-            foreach (var c in city)
-            {
-                Console.WriteLine("city " + c.Key + "   " + c);
-            }
+
 
             var cities = from m in models
                          group m by m.city into c
@@ -67,19 +64,16 @@ namespace task1
                   {
                       file.WriteLine("  {\"city\": \"" + c.cityName + "\",");
                       file.WriteLine("  \"services\": [");
-                      Console.WriteLine(c.cityName + "   total:" + c.total);
                       foreach (var s in c.services)
                       {
                           file.WriteLine("    {\"name\": \"" + s.serviceName + "\",");
                           file.WriteLine("    \"payers\": [");
-                          Console.WriteLine(s.serviceName + "   total:" + s.total + "    "); ;
                           foreach (var p in s.payers)
                           {
                               file.WriteLine("      {\"name\": \"" + p.firstName + " " + p.lastName + "\",");
                               file.WriteLine("      \"payment\": \"" + p.payment + "\",");
                               file.WriteLine("      \"date\": \"" + p.date.Date + "\",");
                               file.WriteLine("      \"account_number\": \"" + p.accNumber + "\"}");
-                              Console.WriteLine(p.firstName + "   " + p.lastName + "   " + p.accNumber + "   " + p.payment);
                           }
                           file.WriteLine("    ]");
                           file.WriteLine("    \"total\": \"" + s.total + "\"}");
@@ -121,10 +115,7 @@ namespace task1
 
                  })
              }); ;*/
-            foreach (Input i in models)
-            {
-                Console.WriteLine("fuc");
-            }
+
         }
        
         
@@ -149,7 +140,6 @@ namespace task1
         {
             string[] input = TxtFileWatcher.ReadFile(e.FullPath);
             FileWatcher.Process(input, e.FullPath);
-            Console.WriteLine("{0}, with path {1} has been {2}", e.Name, e.FullPath, e.ChangeType);
         }
     }
 
@@ -177,7 +167,6 @@ namespace task1
         {
             string[] input = CsvFileWatcher.ReadFile(e.FullPath);
             FileWatcher.Process(input, e.FullPath);
-            Console.WriteLine("{0}, with path {1} has been {2}", e.Name, e.FullPath, e.ChangeType);
         }
 
 

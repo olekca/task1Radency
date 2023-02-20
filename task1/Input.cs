@@ -6,9 +6,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace task1
-{//John, Doe, “Lviv, Kleparivska 35, 4”, 500.0, 2022-27-01, 1234567, Water
-    //<first_name: string>, <last_name: string>, <address: string>,
-    //<payment: decimal>, <date: date>, <account_number: long>, <service: string>
+{
     class Input
     {
         public string firstName;
@@ -19,7 +17,7 @@ namespace task1
         public long accNumber;
         public string service;
         public static Input ParseInput(string s, string filePath)
-        {
+        { 
             Input res = new Input();
             try
             {               

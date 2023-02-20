@@ -19,6 +19,7 @@ namespace task1
         public static Input ParseInput(string s, string filePath)//parses string to object
         { 
             Input res = new Input();
+            ++Program.ParsedStrings;
             try
             {               
                 string[] arr = Regex.Split(s, "”*, *\"*“*");
@@ -29,7 +30,7 @@ namespace task1
                 res.date = DateTime.ParseExact(arr[6], "yyyy-dd-MM", null);
                 res.accNumber = long.Parse(arr[7]);
                 res.service = arr[8];
-                ++Program.ParsedStrings;
+                
             }
             catch(Exception e)
             {

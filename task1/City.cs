@@ -18,7 +18,7 @@ namespace task1
         public DateTime date;
         public long accNumber;
         public string service;
-        public static Input ParseInput(string s)
+        public static Input ParseInput(string s, string filePath)
         {
             Input res = new Input();
             try
@@ -31,9 +31,14 @@ namespace task1
                 res.date = DateTime.ParseExact(arr[6], "yyyy-dd-MM", null);
                 res.accNumber = long.Parse(arr[7]);
                 res.service = arr[8];
+                ++Program.ParsedStrings;
             }
             catch(Exception e)
             {
+                ++Program.FoundErrors;
+                if (!Program.InvalidFiles.Contains(filePath)) {
+                    Program.InvalidFiles.Add(filePath);
+                }
                 return null;
             }
 

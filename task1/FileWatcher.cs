@@ -8,8 +8,7 @@ using System.Threading.Tasks;
 
 namespace task1
 {
-    abstract class FileWatcher //fuck you, even if you fail, you can try later or
-                               //another internship, you know. dont burn yourself, fucking phoenix
+    abstract class FileWatcher 
     {
         protected string formatRegEx;
         protected FileSystemWatcher watcher;
@@ -33,9 +32,10 @@ namespace task1
         public static void OnChanged(object source, FileSystemEventArgs e){}
 
         public static string[] ReadFile(string filePath) { return null; }
-        public static void Process(string[] lines)
+        public static void Process(string[] lines, string filePath)
         {
-            var models = lines.Select(p => Input.ParseInput(p)).ToList().Where(m => m != null);
+            ++Program.ParsedFiles;
+            var models = lines.Select(p => Input.ParseInput(p, filePath)).ToList().Where(m => m != null);
             var city = models.GroupBy(m => m.city);
             foreach (var c in city)
             {
@@ -58,9 +58,9 @@ namespace task1
                                             payers = from payer in serv select payer
                                         }
                          };
-
-            System.IO.Directory.CreateDirectory(ConfigurationManager.AppSettings["OutputDir"] + "\\" + DateTime.Now.ToString("yyyy-dd-MM"));
-            using (StreamWriter file = new(ConfigurationManager.AppSettings["OutputDir"] + "\\input.txt"))
+            string dir = ConfigurationManager.AppSettings["OutputDir"] + "\\" + DateTime.Now.ToString("yyyy-dd-MM");
+            System.IO.Directory.CreateDirectory(dir);
+            using (StreamWriter file = new(dir  + "\\output"+Program.ParsedFiles+".json"))
             {            
                   file.WriteLine("[");
                   foreach (var c in cities)
@@ -148,7 +148,7 @@ namespace task1
         public static void OnChanged(object source, FileSystemEventArgs e)
         {
             string[] input = TxtFileWatcher.ReadFile(e.FullPath);
-            FileWatcher.Process(input);
+            FileWatcher.Process(input, e.FullPath);
             Console.WriteLine("{0}, with path {1} has been {2}", e.Name, e.FullPath, e.ChangeType);
         }
     }
@@ -168,6 +168,7 @@ namespace task1
             {
                 reader.ReadLine();
                 string text = reader.ReadToEnd();
+               
                 return text.Split("\n");
             }
 
@@ -175,7 +176,7 @@ namespace task1
         public static new void OnChanged(object source, FileSystemEventArgs e)
         {
             string[] input = CsvFileWatcher.ReadFile(e.FullPath);
-            FileWatcher.Process(input);
+            FileWatcher.Process(input, e.FullPath);
             Console.WriteLine("{0}, with path {1} has been {2}", e.Name, e.FullPath, e.ChangeType);
         }
 

@@ -9,7 +9,7 @@ namespace task1
 {//John, Doe, “Lviv, Kleparivska 35, 4”, 500.0, 2022-27-01, 1234567, Water
     //<first_name: string>, <last_name: string>, <address: string>,
     //<payment: decimal>, <date: date>, <account_number: long>, <service: string>
-    class input
+    class Input
     {
         public string firstName;
         public string lastName;
@@ -18,9 +18,9 @@ namespace task1
         public DateTime date;
         public long accNumber;
         public string service;
-        public static input parseInput(string s)
+        public static Input ParseInput(string s)
         {
-            input res = new input();
+            Input res = new Input();
             try
             {               
                 string[] arr = Regex.Split(s, "”*, *\"*“*");

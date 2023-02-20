@@ -8,8 +8,9 @@ namespace task1
        
         static void Main(string[] args)
         {
+
             TxtFileWatcher w = new TxtFileWatcher();
-            FileWatcher.Process("C:\\_Path_of_prog\\task1Radency\\qwerty.txt");
+          //  FileWatcher.Process("C:\\_Path_of_prog\\task1Radency\\qwerty.txt");
             /*
             FileSystemWatcher watcher = new FileSystemWatcher();
             watcher.Path = ConfigurationManager.AppSettings["MonitorDir"];

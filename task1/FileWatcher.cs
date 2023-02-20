@@ -13,7 +13,7 @@ namespace task1
     {
         protected string formatRegEx;
         protected FileSystemWatcher watcher;
-        public void createFileWatcher()
+        public void CreateFileWatcher()
         {
             watcher = new FileSystemWatcher();
             watcher.Path = ConfigurationManager.AppSettings["MonitorDir"];
@@ -27,20 +27,15 @@ namespace task1
             NotifyFilters.Security |
             NotifyFilters.Size;
             watcher.Filter = formatRegEx;
-            watcher.Created += new FileSystemEventHandler(OnChanged);
-            watcher.EnableRaisingEvents = true;
+
 
         }
-        public static void OnChanged(object source, FileSystemEventArgs e)
-        {
-            Console.WriteLine("{0}, with path {1} has been {2}", e.Name, e.FullPath, e.ChangeType);
-        }
+        public static void OnChanged(object source, FileSystemEventArgs e){}
 
-        public static void Process(string filePath)
+        public static string[] ReadFile(string filePath) { return null; }
+        public static void Process(string[] lines)
         {
-            var filename = filePath;//"C:\\_Path_of_prog\\task1Radency\\qwerty.txt";
-            var lines = File.ReadAllLines(filename);
-            var models = lines.Select(p => input.parseInput(p)).ToList().Where(m => m != null);
+            var models = lines.Select(p => Input.ParseInput(p)).ToList().Where(m => m != null);
             var city = models.GroupBy(m => m.city);
             foreach (var c in city)
             {
@@ -63,33 +58,41 @@ namespace task1
                                             payers = from payer in serv select payer
                                         }
                          };
-            using StreamWriter file = new("C:\\_Path_of_prog\\task1Radency\\output.txt");
-            file.WriteLine("[");
-            foreach (var c in cities)
-            {
-                file.WriteLine("  {\"city\": \"" + c.cityName + "\",");
-                file.WriteLine("  \"services\": [");
-                Console.WriteLine(c.cityName + "   total:" + c.total);
-                foreach (var s in c.services)
-                {
-                    file.WriteLine("    {\"name\": \"" + s.serviceName + "\",");
-                    file.WriteLine("    \"payers\": [");
-                    Console.WriteLine(s.serviceName + "   total:" + s.total + "    "); ;
-                    foreach (var p in s.payers)
-                    {
-                        file.WriteLine("      {\"name\": \"" + p.firstName+ " " + p.lastName + "\",");
-                        file.WriteLine("      \"payment\": \"" + p.payment + "\",");
-                        file.WriteLine("      \"date\": \"" + p.date + "\",");
-                        file.WriteLine("      \"account_number\": \"" + p.accNumber+ "\"}");
-                        Console.WriteLine(p.firstName + "   " + p.lastName + "   " + p.accNumber + "   " + p.payment);
-                    }
-                    file.WriteLine("    ]");
-                    file.WriteLine("    \"total\": \"" + s.total + "\"}");
-                }
-                file.WriteLine("  ]");
-                file.WriteLine("  \"total\": \"" + c.total + "\"}");
-                file.WriteLine("]");
+
+            System.IO.Directory.CreateDirectory(ConfigurationManager.AppSettings["OutputDir"] + "\\" + DateTime.Now.ToString("yyyy-dd-MM"));
+            using (StreamWriter file = new(ConfigurationManager.AppSettings["OutputDir"] + "\\input.txt"))
+            {            
+                  file.WriteLine("[");
+                  foreach (var c in cities)
+                  {
+                      file.WriteLine("  {\"city\": \"" + c.cityName + "\",");
+                      file.WriteLine("  \"services\": [");
+                      Console.WriteLine(c.cityName + "   total:" + c.total);
+                      foreach (var s in c.services)
+                      {
+                          file.WriteLine("    {\"name\": \"" + s.serviceName + "\",");
+                          file.WriteLine("    \"payers\": [");
+                          Console.WriteLine(s.serviceName + "   total:" + s.total + "    "); ;
+                          foreach (var p in s.payers)
+                          {
+                              file.WriteLine("      {\"name\": \"" + p.firstName + " " + p.lastName + "\",");
+                              file.WriteLine("      \"payment\": \"" + p.payment + "\",");
+                              file.WriteLine("      \"date\": \"" + p.date.Date + "\",");
+                              file.WriteLine("      \"account_number\": \"" + p.accNumber + "\"}");
+                              Console.WriteLine(p.firstName + "   " + p.lastName + "   " + p.accNumber + "   " + p.payment);
+                          }
+                          file.WriteLine("    ]");
+                          file.WriteLine("    \"total\": \"" + s.total + "\"}");
+                      }
+                      file.WriteLine("  ]");
+                      file.WriteLine("  \"total\": \"" + c.total + "\"}");
+
+                  }
+                  file.WriteLine("]");
+                file.Flush();
+                file.Dispose();
             }
+            
 
           /*[{
               "city": "string",
@@ -118,7 +121,7 @@ namespace task1
 
                  })
              }); ;*/
-            foreach (input i in models)
+            foreach (Input i in models)
             {
                 Console.WriteLine("fuc");
             }
@@ -132,12 +135,20 @@ namespace task1
         public TxtFileWatcher()
         {
             base.formatRegEx = "*.txt";
-            base.createFileWatcher();
+            base.CreateFileWatcher();
+            watcher.Created += new FileSystemEventHandler(OnChanged);
+            watcher.EnableRaisingEvents = true;
+        }
 
+        public static new string[] ReadFile(string filePath)
+        {
+            var filename = filePath;
+            return File.ReadAllLines(filename);
         }
         public static void OnChanged(object source, FileSystemEventArgs e)
         {
-            Process(e.FullPath);
+            string[] input = TxtFileWatcher.ReadFile(e.FullPath);
+            FileWatcher.Process(input);
             Console.WriteLine("{0}, with path {1} has been {2}", e.Name, e.FullPath, e.ChangeType);
         }
     }
@@ -147,11 +158,13 @@ namespace task1
         public CsvFileWatcher()
         {
             base.formatRegEx = "*.csv";
-            base.createFileWatcher();
+            base.CreateFileWatcher();
+            watcher.Created += new FileSystemEventHandler(OnChanged);
+            watcher.EnableRaisingEvents = true;
         }
-        public string[] readFile(string fileAddress)
+        public static new string[] ReadFile(string filePath)
         {
-            using (var reader = new StreamReader(fileAddress))
+            using (var reader = new StreamReader(filePath))
             {
                 reader.ReadLine();
                 string text = reader.ReadToEnd();
@@ -159,11 +172,13 @@ namespace task1
             }
 
         }
-
-        public void processInput(string[] lines)
+        public static new void OnChanged(object source, FileSystemEventArgs e)
         {
-            var models = lines.Select(p => input.parseInput(p)).ToList().Where(m => m != null);
-            return;
+            string[] input = CsvFileWatcher.ReadFile(e.FullPath);
+            FileWatcher.Process(input);
+            Console.WriteLine("{0}, with path {1} has been {2}", e.Name, e.FullPath, e.ChangeType);
         }
+
+
     }
 }

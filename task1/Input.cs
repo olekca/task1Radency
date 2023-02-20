@@ -16,7 +16,7 @@ namespace task1
         public DateTime date;
         public long accNumber;
         public string service;
-        public static Input ParseInput(string s, string filePath)
+        public static Input ParseInput(string s, string filePath)//parses string to object
         { 
             Input res = new Input();
             try
@@ -44,7 +44,7 @@ namespace task1
             return res ;
         }
     }
-    class City
+    class City//I made those classes for grouping, but not understood how to add it to linq.
     {
         public string cityName;
         public decimal total;

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace task1
 {
-    abstract class FileWatcher 
+    abstract class FileWatcher //child classes use their own onChanged ivents, constructors and readFiles(), but use parent's Process() and CreateFileWatcher()
     {
         protected string formatRegEx;
         protected FileSystemWatcher watcher;
@@ -32,14 +32,18 @@ namespace task1
         public static void OnChanged(object source, FileSystemEventArgs e){}
 
         public static string[] ReadFile(string filePath) { return null; }
+
+        //This function is rather ProcessAndSaveIntoFile. But I used linq, which I never used before, and it uses var,
+        //so I cant separate this function into smaller functions. 
         public static void Process(string[] lines, string filePath)
         {
             ++Program.ParsedFiles;
             var models = lines.Select(p => Input.ParseInput(p, filePath)).ToList().Where(m => m != null);
             var city = models.GroupBy(m => m.city);
 
-
-            var cities = from m in models
+            //groups into needed structure
+            
+            var cities = from m in models   
                          group m by m.city into c
                          select new
                          {
@@ -58,8 +62,10 @@ namespace task1
             string dir = ConfigurationManager.AppSettings["OutputDir"] + "\\" + DateTime.Now.ToString("yyyy-dd-MM");
             System.IO.Directory.CreateDirectory(dir);
             using (StreamWriter file = new(dir  + "\\output"+Program.ParsedFiles+".json"))
-            {            
-                  file.WriteLine("[");
+            {
+                //I really dont found anything about input and output models, so I used strings :( 
+
+                file.WriteLine("[");
                   foreach (var c in cities)
                   {
                       file.WriteLine("  {\"city\": \"" + c.cityName + "\",");
@@ -86,38 +92,8 @@ namespace task1
                 file.Flush();
                 file.Dispose();
             }
-            
 
-          /*[{
-              "city": "string",
-              "services": [{
-                "name": "string",
-                "payers": [{
-                  "name": "string",
-                  "payment": "decimal",
-                  "date": "date",
-                  "account_number": "long"
-                }],
-                "total": "decimal"
-              }],
-              "total": "decimal"
-            }]
-*/
-
-
-            /* var cityes = models.GroupBy(m => m.city).Select(city => new City {
-                 cityName = city.Key,
-                 total = city.Sum(m => m.payment),
-                 services = city.GroupBy(c => city.service).Select(c => new service
-                 {
-                     serviceName = c.Key,
-                     total = c.Sum(c => c.payment),
-
-                 })
-             }); ;*/
-
-        }
-       
+        }      
         
     }
 

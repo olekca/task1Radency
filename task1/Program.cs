@@ -8,25 +8,29 @@ namespace task1
 {
     class Program
     {
+        //variables for logging
         public static int ParsedFiles = 0;
         public static long ParsedStrings = 0;
         public static long FoundErrors = 0;
         public static List<string> InvalidFiles = new List<string> { };
 
-
+        public static TxtFileWatcher txtWatcher; 
+        public static CsvFileWatcher csvWatcher;
+        public  static LogTimer Log;
         static void Main(string[] args)
         {
             Console.WriteLine("Press s to start");
             while (Console.Read() != 's') ;
-            if (! System.IO.File.Exists(System.Reflection.Assembly.GetEntryAssembly().Location + ".config")){
+            Console.WriteLine("here it is" + ConfigurationManager.AppSettings["MonitorDiddr"]);
+            //checks config
+            if (ConfigurationManager.AppSettings["MonitorDirrr"]==null)
+            {
+                Console.WriteLine("Config settings not found");
                 return;
             }
 
-            
-            LogTimer l = new LogTimer();
-            l.Init();
-            TxtFileWatcher txtWatcher = new TxtFileWatcher();
-            CsvFileWatcher csvWatcher = new CsvFileWatcher();
+
+            Start();
             Console.WriteLine("Process started");
             Console.WriteLine("Press q to quit.\nPress r to restart");
             int input=Console.Read();
@@ -34,15 +38,29 @@ namespace task1
             {
                 if (input == 'q') break;
                 if (input == 'r') {
-                    var fileName = Assembly.GetExecutingAssembly().Location;
-                    System.Diagnostics.Process.Start(fileName);
-                    break;
+                    Start();
+                    Console.WriteLine("Successfully restarted");
+                    Console.WriteLine("Press q to quit.\nPress r to restart");
                 }
                 input = Console.Read();
             }
             
         }
+        public static void Start()
+        {
+            Log = new LogTimer();
+            Log.Init();
+            txtWatcher = new TxtFileWatcher();
+            csvWatcher = new CsvFileWatcher();
+            CleanLog();
+        }
+        public static void CleanLog()
+        {
+            Program.FoundErrors = 0;
+            Program.InvalidFiles = new List<string> { };
+            Program.ParsedFiles = 0;
+            Program.ParsedStrings = 0;
+        }
 
-        
     }
 }

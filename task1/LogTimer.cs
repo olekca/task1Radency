@@ -13,8 +13,8 @@ namespace task1
     {
         static Timer timer;
         long interval = 30000; //1000 = 1 second
-        int Hour = 21;
-        int Minute = 43;
+        int Hour = 23;//time, when it needs to log
+        int Minute = 59;
         static object synclock = new object();
         static bool isLogged = false;
 
@@ -23,13 +23,7 @@ namespace task1
             timer = new Timer(new TimerCallback(MakeLog), null, 0, interval);
         }
 
-        void cleanLog()
-        {
-            Program.FoundErrors = 0;
-            Program.InvalidFiles = new List<string> { };
-            Program.ParsedFiles = 0;
-            Program.ParsedStrings = 0;
-        }
+        
         private void MakeLog(object obj)
         {
             lock (synclock)
@@ -60,7 +54,7 @@ namespace task1
                         }
                         file.Write("]");
                     }
-                    cleanLog();
+                    Program.CleanLog();
                 }
                 else if (dd.Hour != Hour && dd.Minute != Minute)
                 {

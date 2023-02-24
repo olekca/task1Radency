@@ -21,9 +21,9 @@ namespace task1
         {
             Console.WriteLine("Press s to start");
             while (Console.Read() != 's') ;
-            Console.WriteLine("here it is" + ConfigurationManager.AppSettings["MonitorDiddr"]);
+            
             //checks config
-            if (ConfigurationManager.AppSettings["MonitorDirrr"]==null)
+            if (ConfigurationManager.AppSettings["MonitorDir"]==null)
             {
                 Console.WriteLine("Config settings not found");
                 return;

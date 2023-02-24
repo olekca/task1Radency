@@ -45,28 +45,8 @@ namespace task1
             return res ;
         }
     }
-    class City//I made those classes for grouping, but not understood how to add it to linq.
-    {
-        public string cityName;
-        public decimal total;
-        public List<Service> services;
-        
 
+    
 
-    }
-    class Service
-    {
-        public string serviceName;
-        public decimal total;
-        public List<Payer> payers;
-    }
-
-    class Payer
-    {
-        public string firstName;
-        public string lastName;
-        public decimal payment;
-        public DateTime date;
-        public long accNumber;
-    }
+    
 }

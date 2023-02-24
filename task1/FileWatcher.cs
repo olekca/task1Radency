@@ -5,10 +5,11 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace task1
 {
-    abstract class FileWatcher //child classes use their own onChanged ivents, constructors and readFiles(), but use parent's Process() and CreateFileWatcher()
+    abstract class FileWatcher //child classes use their own onChanged ivents, constructors and readFiles(), but use parent's Process(), WriteIntoFile() and CreateFileWatcher()
     {
         protected string formatRegEx;
         protected FileSystemWatcher watcher;
@@ -33,67 +34,90 @@ namespace task1
 
         public static string[] ReadFile(string filePath) { return null; }
 
-        //This function is rather ProcessAndSaveIntoFile. But I used linq, which I never used before, and it uses var,
-        //so I cant separate this function into smaller functions. 
-        public static void Process(string[] lines, string filePath)
+        
+        public static List<City> Process(string[] lines, string filePath)
         {
             ++Program.ParsedFiles;
             var models = lines.Select(p => Input.ParseInput(p, filePath)).ToList().Where(m => m != null);
             var city = models.GroupBy(m => m.city);
 
             //groups into needed structure
-            
-            var cities = from m in models   
+
+            List<City> cities = (from m in models
                          group m by m.city into c
-                         select new
+                         select new City
                          {
                              cityName = c.Key,
                              total = c.Sum(m => m.payment),
-                             services = from p in c
+                             services = (from p in c
                                         group p by p.service into serv
-                                        select new
+                                        select new Service
                                         {
                                             serviceName = serv.Key,
 
                                             total = serv.Sum(p => p.payment),
-                                            payers = from payer in serv select payer
-                                        }
-                         };
+                                            payers = (from payer in serv select new Payer
+                                            {
+                                                accNumber = payer.accNumber,
+                                                date = payer.date,
+                                                firstName = payer.firstName,
+                                                lastName = payer.lastName,
+                                                payment = payer.payment
+                                            }).ToList()
+                                        }).ToList()
+                         }).ToList();
+            return cities;
+            
+        }
+        public static void WriteIntoFileNormalVersion(List<City> cities)
+        {
             string dir = ConfigurationManager.AppSettings["OutputDir"] + "\\" + DateTime.Now.ToString("yyyy-dd-MM");
             System.IO.Directory.CreateDirectory(dir);
-            using (StreamWriter file = new(dir  + "\\output"+Program.ParsedFiles+".json"))
+            string res = JsonConvert.SerializeObject(cities);//This version looks not what exactly it needs to look according to task,
+                                                             // but I added this variant.Just to demonstrate, that I can use it, I guess.
+            using (StreamWriter file = new(dir + "\\output" + Program.ParsedFiles + ".json"))
+            {
+                file.Write(res);
+                file.Flush();
+                file.Dispose();
+            }                                               
+                
+        }
+        public static void WriteIntoFileFirstVersion(List<City>  cities){
+            string dir = ConfigurationManager.AppSettings["OutputDir"] + "\\" + DateTime.Now.ToString("yyyy-dd-MM");
+            System.IO.Directory.CreateDirectory(dir);
+            using (StreamWriter file = new(dir + "\\output" + Program.ParsedFiles + ".json"))
             {
                 //I really dont found anything about input and output models, so I used strings :( 
 
                 file.WriteLine("[");
-                  foreach (var c in cities)
-                  {
-                      file.WriteLine("  {\"city\": \"" + c.cityName + "\",");
-                      file.WriteLine("  \"services\": [");
-                      foreach (var s in c.services)
-                      {
-                          file.WriteLine("    {\"name\": \"" + s.serviceName + "\",");
-                          file.WriteLine("    \"payers\": [");
-                          foreach (var p in s.payers)
-                          {
-                              file.WriteLine("      {\"name\": \"" + p.firstName + " " + p.lastName + "\",");
-                              file.WriteLine("      \"payment\": \"" + p.payment + "\",");
-                              file.WriteLine("      \"date\": \"" + p.date.Date + "\",");
-                              file.WriteLine("      \"account_number\": \"" + p.accNumber + "\"}");
-                          }
-                          file.WriteLine("    ]");
-                          file.WriteLine("    \"total\": \"" + s.total + "\"}");
-                      }
-                      file.WriteLine("  ]");
-                      file.WriteLine("  \"total\": \"" + c.total + "\"}");
+                foreach (City c in cities)
+                {
+                    file.WriteLine("  {\"city\": \"" + c.cityName + "\",");
+                    file.WriteLine("  \"services\": [");
+                    foreach (Service s in c.services)
+                    {
+                        file.WriteLine("    {\"name\": \"" + s.serviceName + "\",");
+                        file.WriteLine("    \"payers\": [");
+                        foreach (Payer p in s.payers)
+                        {
+                            file.WriteLine("      {\"name\": \"" + p.firstName + " " + p.lastName + "\",");
+                            file.WriteLine("      \"payment\": \"" + p.payment + "\",");
+                            file.WriteLine("      \"date\": \"" + p.date.Date + "\",");
+                            file.WriteLine("      \"account_number\": \"" + p.accNumber + "\"}");
+                        }
+                        file.WriteLine("    ]");
+                        file.WriteLine("    \"total\": \"" + s.total + "\"}");
+                    }
+                    file.WriteLine("  ]");
+                    file.WriteLine("  \"total\": \"" + c.total + "\"}");
 
-                  }
-                  file.WriteLine("]");
+                }
+                file.WriteLine("]");
                 file.Flush();
                 file.Dispose();
             }
-
-        }      
+        }
         
     }
 
@@ -112,10 +136,11 @@ namespace task1
             var filename = filePath;
             return File.ReadAllLines(filename);
         }
-        public static void OnChanged(object source, FileSystemEventArgs e)
+        public static new void OnChanged(object source, FileSystemEventArgs e)
         {
             string[] input = TxtFileWatcher.ReadFile(e.FullPath);
-            FileWatcher.Process(input, e.FullPath);
+            List<City> c = FileWatcher.Process(input, e.FullPath);
+            WriteIntoFileFirstVersion(c);
         }
     }
 
@@ -142,7 +167,8 @@ namespace task1
         public static new void OnChanged(object source, FileSystemEventArgs e)
         {
             string[] input = CsvFileWatcher.ReadFile(e.FullPath);
-            FileWatcher.Process(input, e.FullPath);
+            List<City> c = FileWatcher.Process(input, e.FullPath);
+            WriteIntoFileFirstVersion(c);
         }
 
 
